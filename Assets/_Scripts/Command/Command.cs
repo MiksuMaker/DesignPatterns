@@ -5,11 +5,14 @@ using UnityEngine;
 public abstract class Command
 {
     public abstract void Execute();
+
+    public abstract void Undo();
 }
 
 public class DoNothing : Command
 {
     public override void Execute() {} // Do nothing
+    public override void Undo() {} // Do nothing
 }
 
 public class MoveCommand : Command
@@ -26,5 +29,10 @@ public class MoveCommand : Command
     public override void Execute()
     {
         input.currentMoveInput += moveDir;
+    }
+
+    public override void Undo()
+    {
+        input.currentMoveInput -= moveDir;
     }
 }

@@ -31,6 +31,9 @@ public class InputHandler : MonoBehaviour
 
     #endregion
 
+    //List<Command> previousCommands = new List<Command>();
+    Stack<Command> previousCommands = new Stack<Command>();
+
     bool switchingKeybinds = false;
     Command keybindToBeSwitched;
 
@@ -111,10 +114,14 @@ public class InputHandler : MonoBehaviour
         //if (Input.GetKey(KeyCode.A)) { A_key.Execute(); }
         //if (Input.GetKey(KeyCode.S)) { S_key.Execute(); }
         //if (Input.GetKey(KeyCode.D)) { D_key.Execute(); }
-        if (Input.GetKeyDown(KeyCode.W)) { W_key.Execute(); }
-        if (Input.GetKeyDown(KeyCode.A)) { A_key.Execute(); }
-        if (Input.GetKeyDown(KeyCode.S)) { S_key.Execute(); }
-        if (Input.GetKeyDown(KeyCode.D)) { D_key.Execute(); }
+        //if (Input.GetKeyDown(KeyCode.W)) { W_key.Execute(); }
+        //if (Input.GetKeyDown(KeyCode.A)) { A_key.Execute(); }
+        //if (Input.GetKeyDown(KeyCode.S)) { S_key.Execute(); }
+        //if (Input.GetKeyDown(KeyCode.D)) { D_key.Execute(); }
+        if (Input.GetKeyDown(KeyCode.W)) { Execute(ref W_key); }
+        if (Input.GetKeyDown(KeyCode.A)) { Execute(ref A_key); }
+        if (Input.GetKeyDown(KeyCode.S)) { Execute(ref S_key); }
+        if (Input.GetKeyDown(KeyCode.D)) { Execute(ref D_key); ; }
 
         if (Input.GetKey(KeyCode.Q)) { Q_key.Execute(); }
         if (Input.GetKey(KeyCode.E)) { E_key.Execute(); }
@@ -127,11 +134,38 @@ public class InputHandler : MonoBehaviour
             //SwapCommands(ref W_key, ref S_key);
             //SwapCommands(ref A_key, ref D_key);
 
-            switchingKeybinds = true;
+            //switchingKeybinds = true;
+
+            UndoLastCommand();
         }
         #endregion
     }
 
+    #endregion
+
+    #region Command Handling & Undo
+    private void Execute(ref Command executable)
+    {
+        // Execute it
+        executable.Execute();
+
+        // Add it to the last commands list
+        RegisterCommand(ref executable);
+    }
+
+    private void RegisterCommand(ref Command registerable)
+    {
+        //if (previousCommands.Count <= 5)
+        //{
+        //}
+        previousCommands.Push(registerable);
+    }
+
+    private void UndoLastCommand()
+    {
+        Command command = previousCommands.Pop();
+        command.Undo();
+    }
     #endregion
 
     #region Command & Key Rebinding
