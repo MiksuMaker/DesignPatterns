@@ -177,9 +177,10 @@ public class InputHandler : MonoBehaviour
 
     private void RegisterCommand(ref Command registerable)
     {
+        // Don't register special keys
         if (registerable is UndoCommand
-            || registerable is RebindKeysCommand
-            || registerable is ReplayCommand) { return; } // Don't register special keys
+         || registerable is RebindKeysCommand
+         || registerable is ReplayCommand) { return; } 
 
         previousCommands.Push(registerable);
     }
