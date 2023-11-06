@@ -73,3 +73,23 @@ public class RebindKeysCommand : Command
     {
     }
 }
+
+public class ReplayCommand : Command
+{
+    InputHandler input;
+
+    public ReplayCommand(InputHandler _input)
+    {
+        input = _input;
+    }
+
+    public override void Execute()
+    {
+        input.ReplayAllCommands();
+    }
+
+    public override void Undo()
+    {
+
+    }
+}

@@ -30,7 +30,7 @@ public class InputHandler : MonoBehaviour
     DoNothing doNothing;
     UndoCommand undo_command;
     RebindKeysCommand rebindKeys_command;
-    Command rebind_temp;
+    ReplayCommand replay_command;
 
     // MOVEMENT
     MoveCommand moveForward_command;
@@ -42,6 +42,7 @@ public class InputHandler : MonoBehaviour
 
 
     Stack<Command> previousCommands = new Stack<Command>();
+    int currentReplayCommand = 0;
 
     bool switchingKeybindsInProgress = false;
     Command keybindToBeSwitched;
@@ -63,6 +64,7 @@ public class InputHandler : MonoBehaviour
         doNothing = new DoNothing();
         undo_command = new UndoCommand(this);
         rebindKeys_command = new RebindKeysCommand(this);
+        replay_command = new ReplayCommand(this);
 
         // MOVEMENT
         moveForward_command = new MoveCommand(this, Vector3.forward);
@@ -82,6 +84,7 @@ public class InputHandler : MonoBehaviour
 
         Z_key = undo_command;
         Space_key = rebindKeys_command;
+        Q_key = replay_command;
     }
 
     private void SetupNullKeyBinds(List<Command> commands)
@@ -158,24 +161,25 @@ public class InputHandler : MonoBehaviour
     #endregion
 
     #region Command Handling & Undo
-    private void Execute(ref Command executable)
+    private void Execute(ref Command executable, bool register = true)
     {
-        if (switchingKeybindsInProgress && executable is not RebindKeysCommand)
-        { return; }
+        if (switchingKeybindsInProgress && executable is not RebindKeysCommand) { return; }
 
-        if (executable == null) { Debug.Log("Executable is of type DoNothing."); }
+        if (executable == null) { Debug.Log("Executable is NULL."); }
 
         // Execute it
         executable.Execute();
 
         // Add it to the last commands list
+        if (!register) { return; }
         RegisterCommand(ref executable);
     }
 
     private void RegisterCommand(ref Command registerable)
     {
         if (registerable is UndoCommand
-            || registerable is RebindKeysCommand) { return; } // Don't register undo
+            || registerable is RebindKeysCommand
+            || registerable is ReplayCommand) { return; } // Don't register special keys
 
         previousCommands.Push(registerable);
     }
@@ -186,6 +190,58 @@ public class InputHandler : MonoBehaviour
 
         Command command = previousCommands.Pop();
         command.Undo();
+    }
+    #endregion
+
+    #region Replay
+    public void ReplayAllCommands()
+    {
+        StartCoroutine(ReplayGameplay());
+    }
+
+    private void StopReplay()
+    {
+        // Stop the coroutine
+        StopAllCoroutines();    // Stop all coroutines for now
+
+    }
+
+    IEnumerator ReplayGameplay()
+    {
+        float timeBetweenRewinds = 0.05f;
+        float timeBetweenCommands = 0.2f;
+
+        currentReplayCommand = 0;
+
+
+        // Start Rewind
+        Debug.Log("Rewinding to start...");
+        while (currentReplayCommand < previousCommands.Count)
+        {
+            previousCommands.ElementAt(currentReplayCommand).Undo();
+
+            yield return new WaitForSeconds(timeBetweenRewinds);
+
+            currentReplayCommand++;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        currentReplayCommand = previousCommands.Count - 1;
+
+        // Start Replay
+        Debug.Log("Starting Replay!");
+        while (currentReplayCommand > -1)
+        {
+            previousCommands.ElementAt(currentReplayCommand).Execute();
+
+            yield return new WaitForSeconds(timeBetweenCommands);
+
+            currentReplayCommand--;
+        }
+        Debug.Log("Replay finished.");
+
+        //previousCommands.Clear();
     }
     #endregion
 

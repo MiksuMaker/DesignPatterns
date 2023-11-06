@@ -50,6 +50,11 @@ public class PlayerMover : MonoBehaviour
         // Reset movement input
         currentMoveVector = Vector3.zero;
     }
+
+    public void ResetPosition()
+    {
+        rb.MovePosition(Vector3.zero);
+    }
     #endregion
 
 }
