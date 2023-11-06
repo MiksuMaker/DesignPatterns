@@ -56,3 +56,20 @@ public class UndoCommand : Command
 
     }
 }
+
+public class RebindKeysCommand : Command
+{
+    InputHandler input;
+
+    public RebindKeysCommand(InputHandler _input)
+    { input = _input; }
+
+    public override void Execute()
+    {
+        input.HandleKeybindSwitchInputs();
+    }
+
+    public override void Undo()
+    {
+    }
+}
