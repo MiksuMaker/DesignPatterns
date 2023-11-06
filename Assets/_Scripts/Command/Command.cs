@@ -36,3 +36,23 @@ public class MoveCommand : Command
         input.currentMoveInput -= moveDir;
     }
 }
+
+public class UndoCommand : Command
+{
+    InputHandler input;
+
+    public UndoCommand(InputHandler _input)
+    {
+        input = _input;
+    }
+
+    public override void Execute()
+    {
+        input.UndoLastCommand();
+    }
+
+    public override void Undo()
+    {
+
+    }
+}
