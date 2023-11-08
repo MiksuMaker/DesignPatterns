@@ -191,10 +191,7 @@ public class InputHandler : MonoBehaviour
     private void RegisterCommand(Command registerable)
     {
         // Don't register special keys
-        if (registerable is UndoCommand
-         || registerable is RebindKeysCommand
-         || registerable is RedoCommand
-         || registerable is Unrepeatable) { return; }
+        if (registerable is Unrepeatable) { return; }
 
         previousCommands.Push(registerable);
     }
