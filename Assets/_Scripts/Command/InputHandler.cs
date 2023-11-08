@@ -19,7 +19,7 @@ public class InputHandler : MonoBehaviour
     Command S_key;
     Command D_key;
 
-    Command Q_key; Command E_key;
+    Command Q_key; Command E_key = new DoNothing();
     Command Z_key; Command X_key; Command C_key;
 
     Command Space_key;
@@ -28,9 +28,11 @@ public class InputHandler : MonoBehaviour
     #region Commands
     // SPECIAL
     DoNothing doNothing;
-    UndoCommand undo_command;
     RebindKeysCommand rebindKeys_command;
-    ReplayCommand replay_command;
+    UndoCommand undo_command;
+    //RedoCommand redo_command;
+    UnrepeatableCommand redo_command;
+    UnrepeatableCommand replay_command;
 
     // MOVEMENT
     MoveCommand moveForward_command;
@@ -41,11 +43,14 @@ public class InputHandler : MonoBehaviour
     #endregion
 
 
+
     Stack<Command> previousCommands = new Stack<Command>();
     int currentReplayCommand = 0;
 
+    Stack<Command> redoCommands = new Stack<Command>();
+
     bool switchingKeybindsInProgress = false;
-    Command keybindToBeSwitched;
+    //ref Command keybindToBeSwitched;
 
     #endregion
 
@@ -62,9 +67,11 @@ public class InputHandler : MonoBehaviour
     {
         // SPECIAL
         doNothing = new DoNothing();
-        undo_command = new UndoCommand(this);
         rebindKeys_command = new RebindKeysCommand(this);
-        replay_command = new ReplayCommand(this);
+        undo_command = new UndoCommand(this);
+        //redo_command = new RedoCommand(this);
+        redo_command = new UnrepeatableCommand(Redo);
+        replay_command = new UnrepeatableCommand(ReplayAllCommands);
 
         // MOVEMENT
         moveForward_command = new MoveCommand(this, Vector3.forward);
@@ -84,19 +91,20 @@ public class InputHandler : MonoBehaviour
 
         Z_key = undo_command;
         Space_key = rebindKeys_command;
-        Q_key = replay_command;
+        Q_key = redo_command;
+        E_key = replay_command;
     }
 
     private void SetupNullKeyBinds(List<Command> commands)
     {
-        // V1
+        //V1
         //for (int i = 0; i < commands.Count; i++)
         //{
         //    commands[i] = doNothing;
         //}
 
         // V2 : Manual labor
-        Q_key = doNothing; E_key = doNothing; X_key = doNothing; C_key = doNothing;
+        Q_key = doNothing; /*E_key = doNothing;*/ X_key = doNothing; C_key = doNothing;
 
     }
     #endregion
@@ -167,20 +175,26 @@ public class InputHandler : MonoBehaviour
 
         if (executable == null) { Debug.Log("Executable is NULL."); }
 
+        if (executable is not Unrepeatable)
+        {
+            ClearRedoStack();
+        }
+
         // Execute it
         executable.Execute();
 
         // Add it to the last commands list
         if (!register) { return; }
-        RegisterCommand(ref executable);
+        RegisterCommand(executable);
     }
 
-    private void RegisterCommand(ref Command registerable)
+    private void RegisterCommand(Command registerable)
     {
         // Don't register special keys
         if (registerable is UndoCommand
          || registerable is RebindKeysCommand
-         || registerable is ReplayCommand) { return; } 
+         || registerable is RedoCommand
+         || registerable is Unrepeatable) { return; }
 
         previousCommands.Push(registerable);
     }
@@ -190,7 +204,33 @@ public class InputHandler : MonoBehaviour
         if (previousCommands.Count == 0) { return; }
 
         Command command = previousCommands.Pop();
+        RegisterUndo(command);
         command.Undo();
+    }
+    #endregion
+
+    #region Redo
+    private void RegisterUndo(Command undoneCommand)
+    {
+        redoCommands.Push(undoneCommand);
+        //Debug.Log("Undo registered: Count: " + redoCommands.Count);
+    }
+
+    public void Redo()
+    {
+        //Debug.Log("Redoing: Count: " + redoCommands.Count);
+        if (redoCommands.Count == 0) { return; }
+        Command redo = redoCommands.Pop();
+
+        redo.Execute();
+
+        RegisterCommand(redo);
+    }
+
+    private void ClearRedoStack()
+    {
+        //Debug.Log("Clearing Redo Stack");
+        redoCommands.Clear();
     }
     #endregion
 
@@ -264,6 +304,9 @@ public class InputHandler : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.W)) { RebindKey(ref W_key); }
+
+
+        if (Input.GetKeyDown(KeyCode.W)) { RebindKey(ref W_key); }
         if (Input.GetKeyDown(KeyCode.A)) { RebindKey(ref A_key); }
         if (Input.GetKeyDown(KeyCode.S)) { RebindKey(ref S_key); }
         if (Input.GetKeyDown(KeyCode.D)) { RebindKey(ref D_key); }
@@ -283,17 +326,21 @@ public class InputHandler : MonoBehaviour
 
         // If first key is not assigned yet, store it temporarily
         if (!firstKeyAssigned)
+        //if (keybindToBeSwitched == null)
         {
             Debug.Log("Storing the first key, choose another!");
             StoreInputToKeyCode();
+            //keybindToBeSwitched = ref key;
             return;
         }
 
         // If there is a stored key, Swap them!
         SwapCommands(ref KeyCodeToCommand(), ref key);
+        //SwapCommands(ref keybindToBeSwitched, ref key);
 
         // Empty the temp
         keyCodeIsStored = false;
+        //keybindToBeSwitched = null;
 
         Debug.Log("Keys swapped!");
 
@@ -308,7 +355,7 @@ public class InputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A)) { c = KeyCode.A; }
         if (Input.GetKeyDown(KeyCode.S)) { c = KeyCode.S; }
         if (Input.GetKeyDown(KeyCode.D)) { c = KeyCode.D; }
-                                                         
+
         if (Input.GetKeyDown(KeyCode.Q)) { c = KeyCode.Q; }
         if (Input.GetKeyDown(KeyCode.E)) { c = KeyCode.E; }
         if (Input.GetKeyDown(KeyCode.Z)) { c = KeyCode.Z; }

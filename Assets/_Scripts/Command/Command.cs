@@ -9,7 +9,7 @@ public abstract class Command
     public abstract void Undo();
 }
 
-public class DoNothing : Command
+public class DoNothing : Command, Unrepeatable
 {
     public override void Execute() {} // Do nothing
     public override void Undo() {} // Do nothing
@@ -37,7 +37,7 @@ public class MoveCommand : Command
     }
 }
 
-public class UndoCommand : Command
+public class UndoCommand : Command, Unrepeatable
 {
     InputHandler input;
 
@@ -57,7 +57,7 @@ public class UndoCommand : Command
     }
 }
 
-public class RebindKeysCommand : Command
+public class RebindKeysCommand : Command, Unrepeatable
 {
     InputHandler input;
 
@@ -74,22 +74,56 @@ public class RebindKeysCommand : Command
     }
 }
 
-public class ReplayCommand : Command
+public class RedoCommand : Command, Unrepeatable
 {
     InputHandler input;
 
-    public ReplayCommand(InputHandler _input)
+    public RedoCommand(InputHandler _input)
     {
         input = _input;
     }
 
     public override void Execute()
     {
-        input.ReplayAllCommands();
+        //input.ReplayAllCommands();
+        input.Redo();
     }
 
     public override void Undo()
     {
 
     }
+}
+
+public class FunctionCommand : Command
+{
+    public Storable.StoredFunction storedFunction;
+
+    public FunctionCommand(Storable.StoredFunction _storable)
+    {
+        storedFunction = _storable;
+    }
+
+    public override void Execute()
+    {
+        //input.ReplayAllCommands();
+        //input.Redo();
+        storedFunction?.Invoke();
+    }
+
+    public override void Undo()
+    {
+
+    }
+}
+public class UnrepeatableCommand : FunctionCommand, Unrepeatable 
+{
+    public UnrepeatableCommand(Storable.StoredFunction _storable) : base(_storable) { }
+}
+
+public interface Unrepeatable { }
+
+public static class Storable
+{
+    public delegate void StoredFunction();
 }
