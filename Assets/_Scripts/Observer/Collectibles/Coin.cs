@@ -10,8 +10,11 @@ public class Coin : Collectible
 
     protected override void HandleTriggerEnter(Collider other)
     {
-        // Handle Collision
-        Destroy(this.gameObject);
+        if (other.gameObject.layer == 6)
+        {
+            // Handle Collision
+            Destroy(this.gameObject);
+        }
     }
 
     private void OnDisable()

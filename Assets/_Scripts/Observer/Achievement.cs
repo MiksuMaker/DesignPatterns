@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public abstract class Achievement
 {
     public bool isCompleted = false;
-    public string name = "Default Name";
+    public string Name = "Default Name";
     public string Description = "Default Description";
 
     protected AchievementManager manager;
@@ -34,14 +34,14 @@ public class A_CoinCollector : Achievement
 
         ScoreManager.OnCoinCount += Check;
 
-        name = "Coin Collector";
+        Name = "Coin Collector";
     }
 
     public override void Check()
     {
         if (isCompleted == true) { return; }
 
-        if (scoreManager.Coins >= coinsNeeded)
+        if (scoreManager.CoinsCollected >= coinsNeeded)
         {
             Debug.Log("ACHIEVEMENT UNLOCKED: Coin Collector");
             isCompleted = true;
@@ -52,20 +52,27 @@ public class A_CoinCollector : Achievement
 
 public class A_Terminator : Achievement
 {
-    public A_Terminator(AchievementManager m)
+    int killsNeeded = 10;
+    ScoreManager scoreManager;
+
+    public A_Terminator(ScoreManager scM)
     {
-        manager = m;
+        //manager = m;
+        scoreManager = scM;
+
+        ScoreManager.OnEnemySlain += Check;
+        Name = "Terminator";
     }
 
     public override void Check()
     {
         if (isCompleted == true) { return; }
 
-        //if (scoreManager.Coins >= coinsNeeded)
-        //{
-        //    Debug.Log("ACHIEVEMENT UNLOCKED: Coin Collector");
-        //}
-        isCompleted = true;
+        if (scoreManager.EnemiesSlain >= killsNeeded)
+        {
+            Debug.Log("ACHIEVEMENT UNLOCKED: Terminator");
+            isCompleted = true;
+        }
     }
 }
 

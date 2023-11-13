@@ -18,6 +18,7 @@ public class AchievementManager : MonoBehaviour
     {
         //achievements.Add(new A_CoinCollector(this, Coin.OnCoinCollected));
         achievements.Add(new A_CoinCollector(FindObjectOfType<ScoreManager>()));
+        achievements.Add(new A_Terminator(FindObjectOfType<ScoreManager>()));
     }
     #endregion
 
@@ -27,7 +28,7 @@ public class AchievementManager : MonoBehaviour
         foreach (var a in achievements)
         {
             string output = "Achievement \"";
-            output += a.name;
+            output += a.Name;
             output += "\" is ";
             output += a.isCompleted ? "UNLOCKED!" : "locked.";
             Debug.Log(output);
