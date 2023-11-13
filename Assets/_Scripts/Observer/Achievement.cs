@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 public abstract class Achievement
 {
     public bool isCompleted = false;
+    public string name = "Default Name";
+    public string Description = "Default Description";
 
     protected AchievementManager manager;
 
@@ -28,7 +30,11 @@ public class A_CoinCollector : Achievement
         scoreManager = scM;
         //manager = m;
         //Coin.OnCoinCollected += Check;
+        //scM.OnCoinsCount += Check;
+
         ScoreManager.OnCoinCount += Check;
+
+        name = "Coin Collector";
     }
 
     public override void Check()

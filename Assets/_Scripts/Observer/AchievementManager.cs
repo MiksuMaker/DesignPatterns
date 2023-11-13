@@ -21,8 +21,18 @@ public class AchievementManager : MonoBehaviour
     }
     #endregion
 
-    #region Achievement Handling
+    [ContextMenu("Check unlocked achievements")]
+    private void CheckUnlockedAchievements()
+    {
+        foreach (var a in achievements)
+        {
+            string output = "Achievement \"";
+            output += a.name;
+            output += "\" is ";
+            output += a.isCompleted ? "UNLOCKED!" : "locked.";
+            Debug.Log(output);
+        }
+    }
 
-    #endregion
 }
 

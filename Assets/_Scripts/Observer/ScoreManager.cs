@@ -11,10 +11,10 @@ public class ScoreManager : MonoBehaviour
     private void Start()
     {
         // This needs to be a different event because the order can't be guaranteed
-        Coin.OnCoinCollected += CountCoins; 
+        Coin.OnCoinCollected += CoinWasCollected; 
     }
 
-    public void CountCoins()
+    public void CoinWasCollected()
     {
         coinsCollected++;
 
