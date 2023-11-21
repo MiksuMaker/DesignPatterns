@@ -98,27 +98,38 @@ public class RedoCommand : Command, Unrepeatable
 public class FunctionCommand : Command
 {
     public Storable.StoredFunction storedFunction;
+    public Storable.StoredFunction storedUndo;
 
     public FunctionCommand(Storable.StoredFunction _storable)
     {
         storedFunction = _storable;
     }
 
+    public FunctionCommand(Storable.StoredFunction _storable, Storable.StoredFunction _undo)
+    {
+        storedFunction = _storable;
+        storedUndo = _undo;
+    }
+
     public override void Execute()
     {
-        //input.ReplayAllCommands();
-        //input.Redo();
         storedFunction?.Invoke();
     }
 
     public override void Undo()
     {
-
+        storedUndo?.Invoke();
     }
 }
+
+
+
 public class UnrepeatableCommand : FunctionCommand, Unrepeatable 
 {
     public UnrepeatableCommand(Storable.StoredFunction _storable) : base(_storable) { }
+
+    public UnrepeatableCommand(Storable.StoredFunction _storable,
+                               Storable.StoredFunction _undo) : base(_storable, _undo) { }
 }
 
 public interface Unrepeatable { }

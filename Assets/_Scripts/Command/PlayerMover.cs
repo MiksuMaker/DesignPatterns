@@ -12,6 +12,16 @@ public class PlayerMover : MonoBehaviour
     Vector3 desiredPos;
 
     [SerializeField] float moveSpeed = 10f;
+
+    [SerializeField] Transform graphics;
+
+    // STATE MACHINE
+    public enum State
+    {
+        standing, jumping, crouching
+    }
+
+    public State currentState = State.standing;
     #endregion
 
     #region Setup
@@ -37,7 +47,7 @@ public class PlayerMover : MonoBehaviour
     }
     #endregion
 
-    #region Functions
+    #region Movement
     public void UpdateMoveVector(Vector3 newVector)
     {
         currentMoveVector = newVector;
@@ -83,6 +93,83 @@ public class PlayerMover : MonoBehaviour
     {
         rb.MovePosition(Vector3.zero);
     }
+
+    public void Jump()
+    {
+        if (CheckUndesiredState(new List<State> { State.crouching })) { Debug.Log("no JUMPING while CROUCHED");  return; }
+        ChangeState(State.jumping);
+
+        desiredPos += Vector3.up * 5f;
+    }
+
+    public void Unjump()
+    {
+        if (!CheckWantedState(new List<State> { State.jumping })) { return; }
+        ChangeState(State.standing);
+
+        desiredPos += Vector3.down * 5f;
+    }
+
+    public void Crouch()
+    {
+        if (CheckUndesiredState(new List<State> { State.jumping })) { Debug.Log("no CROUCHING while JUMPING"); return; }
+        ChangeState(State.crouching);
+
+        graphics.localScale = new Vector3(1f, 0.5f, 1f);
+    }
+
+    public void Uncrouch()
+    {
+        if (!CheckWantedState(new List<State> { State.crouching })) { return; }
+        ChangeState(State.standing);
+
+        graphics.localScale = new Vector3(1f, 1f, 1f);
+    }
     #endregion
 
+    #region State Machine
+    private void ExecuteStateMachine()
+    {
+        switch (currentState)
+        {
+            case State.standing:
+
+                break;
+
+            case State.jumping:
+
+                break;
+
+            case State.crouching:
+
+                break;
+        }
+    }
+
+    public void ChangeState(State newState)
+    {
+        Debug.Log("State: " + newState);
+        currentState = newState;
+    }
+
+    public bool CheckWantedState(List<State> states)
+    {
+        foreach (var s in states)
+        {
+            // If state is found, return TRUE
+            if (currentState == s) { return true; }
+        }
+        return false;
+    }
+
+    public bool CheckUndesiredState(List<State> states)
+    {
+        foreach (var s in states)
+        {
+            // If state is found, return FALSE
+            if (currentState == s) { return true; }
+        }
+        return false;
+    }
+    #endregion
 }

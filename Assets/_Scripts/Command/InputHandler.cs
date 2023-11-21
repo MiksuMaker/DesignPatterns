@@ -22,7 +22,12 @@ public class InputHandler : MonoBehaviour
     Command Q_key; Command E_key = new DoNothing();
     Command Z_key; Command X_key; Command C_key;
 
-    Command Space_key;
+    Command R_Key;
+    Command Ctrl_Key_Down;
+    Command Ctrl_Key_Up;
+
+    Command Space_key_Down;
+    Command Space_key_Up;
     #endregion
 
     #region Commands
@@ -40,6 +45,10 @@ public class InputHandler : MonoBehaviour
     MoveCommand moveBack_command;
     MoveCommand moveRight_command;
 
+    FunctionCommand crouch_command;
+    FunctionCommand uncrouch_command;
+    FunctionCommand jump_command;
+    FunctionCommand unjump_command;
     #endregion
 
 
@@ -78,6 +87,14 @@ public class InputHandler : MonoBehaviour
         moveLeft_command = new MoveCommand(this, Vector3.left);
         moveBack_command = new MoveCommand(this, Vector3.back);
         moveRight_command = new MoveCommand(this, Vector3.right);
+
+        crouch_command = new FunctionCommand(mover.Crouch, mover.Uncrouch);
+        uncrouch_command = new FunctionCommand(mover.Uncrouch, mover.Crouch);
+        jump_command = new FunctionCommand(mover.Jump, mover.Unjump);
+        unjump_command = new FunctionCommand(mover.Unjump, mover.Jump);
+
+        // OTHER
+
     }
 
     private void SetupInitialKeyBinds()
@@ -90,9 +107,16 @@ public class InputHandler : MonoBehaviour
         D_key = moveRight_command;
 
         Z_key = undo_command;
-        Space_key = rebindKeys_command;
+        //Space_key = rebindKeys_command;
+        R_Key = rebindKeys_command;
         Q_key = redo_command;
         E_key = replay_command;
+
+        Ctrl_Key_Down = crouch_command;
+        Ctrl_Key_Up = uncrouch_command;
+
+        Space_key_Down = jump_command;
+        Space_key_Up = unjump_command;
     }
 
     private void SetupNullKeyBinds(List<Command> commands)
@@ -162,7 +186,13 @@ public class InputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.X)) { Execute(ref X_key); }
         if (Input.GetKeyDown(KeyCode.C)) { Execute(ref C_key); }
 
-        if (Input.GetKeyDown(KeyCode.Space)) { Execute(ref Space_key); }
+        if (Input.GetKeyDown(KeyCode.R)) { Execute(ref R_Key); }
+
+        if (Input.GetKeyDown(KeyCode.Space)) { Execute(ref Space_key_Down); }
+        if (Input.GetKeyUp(KeyCode.Space)) { Execute(ref Space_key_Up); }
+
+        if (Input.GetKeyDown(KeyCode.LeftControl)) { Execute(ref Ctrl_Key_Down); }
+        if (Input.GetKeyUp(KeyCode.LeftControl)) { Execute(ref Ctrl_Key_Up); }
         #endregion
     }
 
@@ -378,7 +408,7 @@ public class InputHandler : MonoBehaviour
             case KeyCode.X: return ref X_key;
             case KeyCode.C: return ref C_key;
 
-            case KeyCode.Space: return ref Space_key;
+            case KeyCode.Space: return ref Space_key_Down;
         }
 
         return ref W_key; // Default
