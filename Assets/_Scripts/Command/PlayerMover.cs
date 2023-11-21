@@ -15,19 +15,26 @@ public class PlayerMover : MonoBehaviour
 
     [SerializeField] Transform graphics;
 
+    [SerializeField] ParticleSystem fireParticles;
+
     // STATE MACHINE
     public enum State
     {
-        standing, jumping, crouching
+        standing, jumping, crouching,
+
+        burning
     }
 
     public State currentState = State.standing;
+    public delegate void StateChangeDelegate(State newState);
+    public StateChangeDelegate OnStateChange;
     #endregion
 
     #region Setup
     private void Start()
     {
         SetupPlayerMover();
+        fireParticles.Stop();
     }
 
     private void SetupPlayerMover()
@@ -97,6 +104,7 @@ public class PlayerMover : MonoBehaviour
     public void Jump()
     {
         if (CheckUndesiredState(new List<State> { State.crouching })) { Debug.Log("no JUMPING while CROUCHED");  return; }
+        if (CheckUndesiredState(new List<State> { State.burning })) { Debug.Log("no JUMPING while BURNING");  return; }
         ChangeState(State.jumping);
 
         desiredPos += Vector3.up * 5f;
@@ -123,9 +131,25 @@ public class PlayerMover : MonoBehaviour
         if (!CheckWantedState(new List<State> { State.crouching })) { return; }
         ChangeState(State.standing);
 
+        if (!fireParticles.isStopped) { StopBurning(); }
+
         graphics.localScale = new Vector3(1f, 1f, 1f);
     }
     #endregion
+
+    public void StartBurning()
+    {
+        ChangeState(State.burning);
+
+        fireParticles.Play();
+    }
+
+    public void StopBurning()
+    {
+        ChangeState(State.standing);
+
+        if (!fireParticles.isStopped) { fireParticles.Stop(); }
+    }
 
     #region State Machine
     private void ExecuteStateMachine()
@@ -148,8 +172,10 @@ public class PlayerMover : MonoBehaviour
 
     public void ChangeState(State newState)
     {
-        Debug.Log("State: " + newState);
+        //Debug.Log("State: " + newState);
         currentState = newState;
+
+        OnStateChange?.Invoke(newState);
     }
 
     public bool CheckWantedState(List<State> states)
