@@ -52,7 +52,7 @@ public class TileManager : MonoBehaviour
     }
     #endregion
 
-    #region Get tiles
+    #region Higher Functions
     public CellState[,] RegisterGrid(int width, int length)
     {
         CellState[,] grid = new CellState[width,length];
@@ -77,6 +77,27 @@ public class TileManager : MonoBehaviour
         }
 
         return grid;
+    }
+
+    public void DrawGrid(CellState[,] grid, int width, int length)
+    {
+        for (int y = 0; y < length; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                // Check if there is a cell at the pos
+                if (grid[x,y] == CellState.alive)
+                {
+                    // If so, draw it
+                    PaintTileAt(x, y);
+                }
+                else
+                {
+                    ClearTileAt(x, y);
+                }
+
+            }
+        }
     }
     #endregion
 
