@@ -16,7 +16,9 @@ public class TileManager : MonoBehaviour
     #region Setup
     private void Start()
     {
-
+        //PaintTileAt(0, 0);
+        //PaintTileAt(1, 0);
+        //PaintTileAt(0, 2);
     }
     #endregion
 
@@ -47,6 +49,34 @@ public class TileManager : MonoBehaviour
         Tile temp = tileMap.GetTile(pos) as Tile;
 
         return temp;
+    }
+    #endregion
+
+    #region Get tiles
+    public CellState[,] RegisterGrid(int width, int length)
+    {
+        CellState[,] grid = new CellState[width,length];
+
+        for (int y = 0; y < length; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                // Check if there is a cell at the pos
+                if (IsThereTileAt(x, y))
+                {
+                    // If so, register it to the Grid
+                    grid[x, y] = CellState.alive;
+                    Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.green, 3f);
+                }
+                else
+                {
+                    grid[x, y] = CellState.dead;
+                }
+
+            }
+        }
+
+        return grid;
     }
     #endregion
 
