@@ -15,8 +15,11 @@ public class GameOfLife : MonoBehaviour
 
     Vector3 offset = new Vector3(0.5f, 0f, 0.5f);
 
-    CellState[,] currentGrid;
-    CellState[,] bufferGrid;
+    //CellState[,] currentGrid;
+    //CellState[,] bufferGrid;
+
+    Cell[,] currentGrid;
+    Cell[,] bufferGrid;
 
     [Header("Ticking Speed")]
     [SerializeField, Range(0f, 5f)]
@@ -38,10 +41,14 @@ public class GameOfLife : MonoBehaviour
 
     private void SetupGrids()
     {
-        currentGrid = new CellState[width, length];
-        bufferGrid = new CellState[width, length];
+        //currentGrid = new CellState[width, length];
+        //bufferGrid = new CellState[width, length];
+
+        currentGrid = new Cell[width, length];
+        bufferGrid = new Cell[width, length];
 
         currentGrid = tileManager.RegisterGrid(width, length);
+        bufferGrid = tileManager.RegisterGrid(width, length);
     }
     #endregion
 
@@ -153,29 +160,45 @@ public class GameOfLife : MonoBehaviour
 
         int neighbours = GetLiveNeighbours(x, y);
 
-        if (neighbours < 2) // TOO LONELY
-        {
-            bufferGrid[x, y] = CellState.DEAD;
-
-        }
-        else if (currentGrid[x, y] == CellState.ALIVE && neighbours < 4) // LIVABLE
-        {
-            bufferGrid[x, y] = CellState.ALIVE;
-
-        }
-        else if (currentGrid[x, y] == CellState.ALIVE && neighbours > 3) // TOO CROWDED
-        {
-            bufferGrid[x, y] = CellState.DEAD;
-
-        }
-        else if (currentGrid[x, y] == CellState.DEAD && neighbours == 3) // REBIRTH
-        {
-            bufferGrid[x, y] = CellState.ALIVE;
-        }
-        else if (currentGrid[x, y] == CellState.ALIVE)
+        if (currentGrid[x, y].state == Cell.State.DEAD)
         {
 
+            if (neighbours == 3) // REBIRTH
+            {
+                //bufferGrid[x, y].state = Cell.State.ALIVE;
+                //bufferGrid[x, y].age = Cell.Age.BORN;
+
+                bufferGrid[x, y].NewCell();
+            }
+            else
+            {
+                bufferGrid[x, y].DeadCell(false);
+            }
         }
+        else
+        {
+            if (neighbours < 2) // TOO LONELY
+            {
+                //bufferGrid[x, y].state = Cell.State.DEAD;
+                bufferGrid[x, y].DeadCell(true);
+            }
+            else if (neighbours < 4) // LIVABLE
+            {
+                //bufferGrid[x, y].state = Cell.State.ALIVE;
+                bufferGrid[x, y].NewCell(false);
+            }
+            else if (neighbours > 3) // TOO CROWDED
+            {
+                //bufferGrid[x, y].state = Cell.State.DEAD;
+                bufferGrid[x, y].DeadCell(true);
+            }
+            //else if (currentGrid[x, y].state == Cell.State.ALIVE)
+            //{
+
+            //}
+
+        }
+
 
     }
 
@@ -196,7 +219,8 @@ public class GameOfLife : MonoBehaviour
                 {
                     pos = new Vector3(x, 0f, y) + offset;
 
-                    if (currentGrid[x, y] == CellState.ALIVE)
+
+                    if (currentGrid[x, y].state == Cell.State.ALIVE)
                     {
                         livingNeighbours++;
 
@@ -229,6 +253,38 @@ public class GameOfLife : MonoBehaviour
 public enum CellState
 {
     DEAD, ALIVE,
+}
 
-    BORN, DECAYING
+public struct Cell
+{
+    public enum State
+    {
+        DEAD, ALIVE
+    }
+
+    public enum Age
+    {
+        BORN, MATURE, DECAYING, BURIED
+    }
+
+    //public State state = State.DEAD;
+    //public Age age = Age.BURIED;
+    public State state;
+    public Age age;
+
+    public void NewCell(bool brandNew = true)
+    {
+        state = State.ALIVE;
+
+        if (brandNew) { age = Age.BORN; }
+        else { age = Age.MATURE; }
+    }
+
+    public void DeadCell(bool freshDeath = false)
+    {
+        state = State.DEAD;
+
+        if (freshDeath) { age = Age.DECAYING; }
+        else { age = Age.BURIED; }
+    }
 }
