@@ -13,6 +13,8 @@ public class GameOfLife : MonoBehaviour
     [SerializeField] int width = 10;
     [SerializeField] int length = 10;
 
+    Vector3 offset = new Vector3(0.5f, 0f, 0.5f);
+
     CellState[,] currentGrid;
     CellState[,] bufferGrid;
 
@@ -20,6 +22,10 @@ public class GameOfLife : MonoBehaviour
     [SerializeField, Range(0f, 5f)]
     float tickLength = 1f;
     float timeSinceTick = 0f;
+
+    IEnumerator bufferUpdaterCoroutine;
+    bool coroutineRunningDone = true;
+    [SerializeField] float coroutineWait = 0.5f;
     #endregion
 
     #region Setup
@@ -47,23 +53,52 @@ public class GameOfLife : MonoBehaviour
 
     private void HandleGame()
     {
-        // Increase time
-        timeSinceTick += Time.deltaTime;
 
-        if (timeSinceTick > tickLength)
+        if (coroutineRunningDone)
         {
-            // Update the buffer grid
-            UpdateBufferGrid();
-
-
-            // Tick the simulation
-
-            // Draw the new grid state
-            tileManager.DrawGrid(currentGrid, width, length);
-
-            // Reset
-            timeSinceTick = 0f;
+            StartCoroutine(BufferCoroutine());
         }
+
+        //// Increase time
+        //timeSinceTick += Time.deltaTime;
+
+        //if (timeSinceTick > tickLength)
+        //{
+        //    // Update the buffer grid
+        //    UpdateBufferGrid();
+
+        //    // Update the current tiles
+        //    currentGrid = bufferGrid;
+
+        //    // Draw the new grid state
+        //    tileManager.DrawGrid(currentGrid, width, length);
+
+        //    // Reset
+        //    timeSinceTick = 0f;
+        //}
+    }
+
+    IEnumerator BufferCoroutine()
+    {
+        coroutineRunningDone = false;
+
+        for (int y = 0; y < length; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                UpdateBufferGridCell(x, y);
+
+                yield return new WaitForSeconds(coroutineWait);
+            }
+        }
+
+        // Switch
+        currentGrid = bufferGrid;
+
+        // Draw
+        tileManager.DrawGrid(currentGrid, width, length);
+
+        coroutineRunningDone = true;
     }
     #endregion
 
@@ -72,41 +107,55 @@ public class GameOfLife : MonoBehaviour
     {
         for (int y = 0; y < length; y++)
         {
-            for (int x = 0; x < length; x++)
+            for (int x = 0; x < width; x++)
             {
-                // Update according to RULES:
-
-                // 1. Fewer than 2 neighbours           -> DIE
-                // 2. 2 or 3 neighbours                 -> LIVE
-                // 3. more than 3 neighbours            -> DIE
-                // 4. dead cell with 3 live neighbours  -> NEW CELL BORN
-
-                int neighbours = GetLiveNeighbours(x, y);
-
-                if (neighbours < 2)
-                {
-                    bufferGrid[x, y] = CellState.dead;
-                }
-                else if (bufferGrid[x, y] == CellState.alive && neighbours < 4)
-                {
-                    bufferGrid[x, y] = CellState.alive;
-                }
-                else if (bufferGrid[x, y] == CellState.alive && neighbours > 3)
-                {
-                    bufferGrid[x, y] = CellState.dead;
-                }
-                else if (bufferGrid[x, y] == CellState.dead && neighbours == 3)
-                {
-                    bufferGrid[x, y] = CellState.alive;
-                }
-
+                UpdateBufferGridCell(x, y);
             }
         }
+    }
 
-        // Update the current tiles
-        //CellState[,] temp = new CellState[width, length];
-        //CellState[,] temp = currentGrid;
-        currentGrid = bufferGrid;
+    private void UpdateBufferGridCell(int x, int y)
+    {
+        // Update according to RULES:
+
+        // 1. Fewer than 2 neighbours           -> DIE
+        // 2. 2 or 3 neighbours                 -> LIVE
+        // 3. more than 3 neighbours            -> DIE
+        // 4. dead cell with 3 live neighbours  -> NEW CELL BORN
+
+        Vector3 start = transform.position + offset + new Vector3(x, 0f, y);
+        Vector3 dir = Vector3.up;
+
+        int neighbours = GetLiveNeighbours(x, y);
+
+        //if (currentGrid[x, y] == CellState.ALIVE && neighbours < 2) // TOO LONELY
+        if (neighbours < 2) // TOO LONELY
+        {
+            bufferGrid[x, y] = CellState.DEAD;
+            Debug.DrawRay(start, dir, Color.blue, tickLength);
+
+        }
+        else if (currentGrid[x, y] == CellState.ALIVE && neighbours < 4) // LIVABLE
+        {
+            bufferGrid[x, y] = CellState.ALIVE;
+            Debug.DrawRay(start, dir, Color.green, tickLength);
+
+        }
+        else if (currentGrid[x, y] == CellState.ALIVE && neighbours > 3) // TOO CROWDED
+        {
+            bufferGrid[x, y] = CellState.DEAD;
+            Debug.DrawRay(start, dir, Color.red, tickLength);
+
+        }
+        else if (currentGrid[x, y] == CellState.DEAD && neighbours == 3) // REBIRTH
+        {
+            bufferGrid[x, y] = CellState.ALIVE;
+            Debug.DrawRay(start, dir, Color.yellow, tickLength);
+        }
+        else if (currentGrid[x, y] == CellState.ALIVE)
+        {
+            Debug.DrawRay(start, dir * 2f, Color.magenta, tickLength);
+        }
     }
 
     private int GetLiveNeighbours(int _X, int _Y)
@@ -121,13 +170,22 @@ public class GameOfLife : MonoBehaviour
                 {
                     // current i,j is not x,y
                     //if (currentGridState[i, j] == true)
-                    if (currentGrid[x, y] == CellState.alive)
+                    if (currentGrid[x, y] == CellState.ALIVE)
                     {
                         livingNeighbours++;
                     }
                 }
             }
         }
+
+        //Vector3 start = transform.position + offset + new Vector3(_X, 0f, _Y);
+        //Vector3 dir = Vector3.up;
+
+        //if (livingNeighbours < 2)       { Debug.DrawRay(start, dir, Color.blue, tickLength); }
+        //else if (livingNeighbours < 4)  { Debug.DrawRay(start, dir, Color.green, tickLength); }
+        //else if (livingNeighbours > 3)  { Debug.DrawRay(start, dir, Color.red, tickLength); }
+        //else if (livingNeighbours == 3) { Debug.DrawRay(start, dir, Color.yellow, tickLength); }
+
         return livingNeighbours;
     }
     #endregion
@@ -135,10 +193,21 @@ public class GameOfLife : MonoBehaviour
     private void OnDrawGizmos()
     {
         Vector3 leftBottom = transform.position;
+        Vector3 rightBottom = leftBottom + Vector3.right * width;
+        Vector3 leftTop = leftBottom + Vector3.forward * length;
+        Vector3 rightTop = leftTop + rightBottom;
+
+        Gizmos.color = Color.red;
+
+        // Draw lines
+        Gizmos.DrawLine(leftBottom, rightBottom);
+        Gizmos.DrawLine(leftBottom, leftTop);
+        Gizmos.DrawLine(rightTop, rightBottom);
+        Gizmos.DrawLine(rightTop, leftTop);
     }
 }
 
 public enum CellState
 {
-    dead, alive
+    DEAD, ALIVE
 }

@@ -10,6 +10,8 @@ public class TileManager : MonoBehaviour
     [SerializeField]
     Tilemap tileMap;
     [SerializeField]
+    Tilemap bufferTileMap;
+    [SerializeField]
     Tile lifeCell;
     #endregion
 
@@ -65,12 +67,13 @@ public class TileManager : MonoBehaviour
                 if (IsThereTileAt(x, y))
                 {
                     // If so, register it to the Grid
-                    grid[x, y] = CellState.alive;
-                    Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.green, 3f);
+                    grid[x, y] = CellState.ALIVE;
+                    Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.green, 1f);
                 }
                 else
                 {
-                    grid[x, y] = CellState.dead;
+                    grid[x, y] = CellState.DEAD;
+                    Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.magenta, 1f);
                 }
 
             }
@@ -86,7 +89,7 @@ public class TileManager : MonoBehaviour
             for (int x = 0; x < width; x++)
             {
                 // Check if there is a cell at the pos
-                if (grid[x,y] == CellState.alive)
+                if (grid[x,y] == CellState.ALIVE)
                 {
                     // If so, draw it
                     PaintTileAt(x, y);
