@@ -54,28 +54,28 @@ public class GameOfLife : MonoBehaviour
     private void HandleGame()
     {
 
-        if (coroutineRunningDone)
-        {
-            StartCoroutine(BufferCoroutine());
-        }
-
-        //// Increase time
-        //timeSinceTick += Time.deltaTime;
-
-        //if (timeSinceTick > tickLength)
+        //if (coroutineRunningDone)
         //{
-        //    // Update the buffer grid
-        //    UpdateBufferGrid();
-
-        //    // Update the current tiles
-        //    currentGrid = bufferGrid;
-
-        //    // Draw the new grid state
-        //    tileManager.DrawGrid(currentGrid, width, length);
-
-        //    // Reset
-        //    timeSinceTick = 0f;
+        //    StartCoroutine(BufferCoroutine());
         //}
+
+        // Increase time
+        timeSinceTick += Time.deltaTime;
+
+        if (timeSinceTick > tickLength)
+        {
+            // Update the buffer grid
+            UpdateBufferGrid();
+
+            // Update the current tiles
+            LoadBufferIntoCurrentGrid();
+
+            // Draw the new grid state
+            tileManager.DrawGrid(currentGrid, width, length);
+
+            // Reset
+            timeSinceTick = 0f;
+        }
     }
 
     IEnumerator BufferCoroutine()
@@ -93,12 +93,36 @@ public class GameOfLife : MonoBehaviour
         }
 
         // Switch
-        currentGrid = bufferGrid;
+        LoadBufferIntoCurrentGrid();
 
         // Draw
         tileManager.DrawGrid(currentGrid, width, length);
 
         coroutineRunningDone = true;
+    }
+
+    private void LoadBufferIntoCurrentGrid()
+    {
+        //Debug.Log("=== LOADING BUFFER to CURRENT grid ===");
+
+        // V1   ->    CHANGES REFERENCE TO BUFFERGRID
+        //currentGrid = bufferGrid; // CHANGES THE REFERENCE TO THE BUFFERGRID
+
+
+        // V2   ->    WORKS
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < length; y++)
+            {
+                currentGrid[x, y] = bufferGrid[x, y];
+            }
+        }
+
+
+        // V3   ->    DOESN'T DO ANYTHING
+        //CellState[,] temp = currentGrid;
+        //currentGrid = bufferGrid;
+        //currentGrid = temp;
     }
     #endregion
 
@@ -124,7 +148,12 @@ public class GameOfLife : MonoBehaviour
         // 4. dead cell with 3 live neighbours  -> NEW CELL BORN
 
         Vector3 start = transform.position + offset + new Vector3(x, 0f, y);
-        Vector3 dir = Vector3.up;
+        //Vector3 dir = Vector3.up;
+        Vector3 dir = Vector3.up * 0f;
+
+        //Debug.Log("===============================================");
+        //Debug.Log("Cell State BEFORE: Current " + currentGrid[x, y].ToString() + " || Buffer: " + bufferGrid[x, y].ToString());
+        //Debug.Log("Number of neighbours: " + neighbours);
 
         int neighbours = GetLiveNeighbours(x, y);
 
@@ -132,49 +161,73 @@ public class GameOfLife : MonoBehaviour
         if (neighbours < 2) // TOO LONELY
         {
             bufferGrid[x, y] = CellState.DEAD;
-            Debug.DrawRay(start, dir, Color.blue, tickLength);
+            //Debug.DrawRay(start, dir, Color.blue, tickLength);
 
         }
         else if (currentGrid[x, y] == CellState.ALIVE && neighbours < 4) // LIVABLE
         {
             bufferGrid[x, y] = CellState.ALIVE;
-            Debug.DrawRay(start, dir, Color.green, tickLength);
+            //Debug.DrawRay(start, dir, Color.green, tickLength);
 
         }
         else if (currentGrid[x, y] == CellState.ALIVE && neighbours > 3) // TOO CROWDED
         {
             bufferGrid[x, y] = CellState.DEAD;
-            Debug.DrawRay(start, dir, Color.red, tickLength);
+            //Debug.DrawRay(start, dir, Color.red, tickLength);
 
         }
         else if (currentGrid[x, y] == CellState.DEAD && neighbours == 3) // REBIRTH
         {
             bufferGrid[x, y] = CellState.ALIVE;
-            Debug.DrawRay(start, dir, Color.yellow, tickLength);
+            //Debug.DrawRay(start, dir, Color.yellow, tickLength);
         }
         else if (currentGrid[x, y] == CellState.ALIVE)
         {
-            Debug.DrawRay(start, dir * 2f, Color.magenta, tickLength);
+            //Debug.DrawRay(start, dir * 2f, Color.magenta, tickLength);
         }
+
+        //Debug.Log("Cell State AFTER: Current " + currentGrid[x, y].ToString() + " || Buffer: " + bufferGrid[x, y].ToString());
     }
 
     private int GetLiveNeighbours(int _X, int _Y)
     {
         int livingNeighbours = 0;
 
+        Vector3 start = transform.position + offset + new Vector3(_X, 0f, _Y);
+        Vector3 pos;
+
         for (int x = _X - 1; x <= _X + 1; x++)
         {
             for (int y = _Y - 1; y <= _Y + 1; y++)
             {
+
+
                 if (!(x == _X & y == _Y) && x >= 0 && y >= 0 && x < width && y < length)
                 {
-                    // current i,j is not x,y
-                    //if (currentGridState[i, j] == true)
+                    pos = new Vector3(x, 0f, y) + offset;
+
                     if (currentGrid[x, y] == CellState.ALIVE)
                     {
                         livingNeighbours++;
+
+                        //Debug.DrawRay(pos, Vector3.up, Color.green, coroutineWait);
                     }
+                    //else
+                    //{
+                    //    Debug.DrawRay(pos, Vector3.up, Color.red, coroutineWait);
+                    //}
                 }
+                //else if ((x == _X & y == _Y))
+                //{
+                //    if (currentGrid[x, y] == CellState.ALIVE)
+                //    {
+                //        Debug.DrawRay(pos, Vector3.up, Color.green, coroutineWait);
+                //    }
+                //    else
+                //    {
+                //        Debug.DrawRay(pos, Vector3.up, Color.red, coroutineWait);
+                //    }
+                //}
             }
         }
 

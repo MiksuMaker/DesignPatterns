@@ -73,7 +73,7 @@ public class TileManager : MonoBehaviour
                 else
                 {
                     grid[x, y] = CellState.DEAD;
-                    Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.magenta, 1f);
+                    //Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.magenta, 1f);
                 }
 
             }

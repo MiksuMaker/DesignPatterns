@@ -2250,11 +2250,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4512599728119394873, guid: d98db46b4c144574e8b42eaccbd24b14, type: 3}
       propertyPath: tickLength
-      value: 1
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 4512599728119394873, guid: d98db46b4c144574e8b42eaccbd24b14, type: 3}
       propertyPath: coroutineWait
-      value: 0.05
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 6489768839306242376, guid: d98db46b4c144574e8b42eaccbd24b14, type: 3}
       propertyPath: m_LocalPosition.x
