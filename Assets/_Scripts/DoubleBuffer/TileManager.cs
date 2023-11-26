@@ -132,7 +132,7 @@ public class TileManager : MonoBehaviour
                 {
                     // If so, register it to the Grid
                     newCell.NewCell(false);
-                    Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.green, 1f);
+                    //Debug.DrawRay(new Vector3(x + 0.5f, 0f, y + 0.5f), Vector3.up, Color.green, 1f);
                 }
                 else
                 {

@@ -126,10 +126,17 @@ public class GameOfLife : MonoBehaviour
         }
 
 
-        // V3   ->    DOESN'T DO ANYTHING
-        //CellState[,] temp = currentGrid;
+        //// V3   ->    DOESN'T DO ANYTHING
+        //Cell[,] temp = currentGrid;
         //currentGrid = bufferGrid;
         //currentGrid = temp;
+
+        //// V4 ->   WORKS
+        //currentGrid = bufferGrid;
+        //bufferGrid = null;
+        //bufferGrid = new Cell[width, length];
+        //bufferGrid = tileManager.RegisterGrid(width, length);
+
     }
     #endregion
 
