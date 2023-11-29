@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DeadCell
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: 7482667652216324306, guid: 7c08f6b06f267234c930ab3a7172a648, type: 3}
-  m_Color: {r: 0.23584908, g: 0.04853609, b: 0, a: 1}
+  m_Color: {r: 0.509434, g: 0.16032167, b: 0.06968674, a: 1}
   m_Transform:
     e00: 1
     e01: 0

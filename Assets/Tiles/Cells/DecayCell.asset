@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DecayCell
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: 7482667652216324306, guid: 7c08f6b06f267234c930ab3a7172a648, type: 3}
-  m_Color: {r: 0.7735849, g: 0.32775682, b: 0.0693307, a: 1}
+  m_Color: {r: 0.509434, g: 0.32947028, b: 0.03123889, a: 1}
   m_Transform:
     e00: 1
     e01: 0
